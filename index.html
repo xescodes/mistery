@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Una aventura CYOA de terror y misterio ambientada en el Museu Nacional d'Art de Catalunya" />
+    <title>Terror en el Museo - Aventura CYOA</title>
+    <style>
+      body {
+        font-family: 'Crimson Text', serif;
+        background-color: #000;
+        color: #fff;
+        margin: 0;
+        padding: 20px;
+        min-height: 100vh;
+        background: linear-gradient(135deg, #000000 0%, #1a1a1a 100%);
+        position: relative;
+        overflow-x: hidden;
+      }
+
+      body::before {
+        content: '';
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="%23000"/><circle cx="50" cy="50" r="1" fill="%23333"/></svg>') repeat;
+        opacity: 0.1;
+        pointer-events: none;
+        z-index: 0;
+      }
+
+      .story-container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+        background: rgba(0, 0, 0, 0.7);
+        border-radius: 10px;
+        box-shadow: 0 0 20px rgba(255, 0, 0, 0.1);
+        position: relative;
+        z-index: 1;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 0, 0, 0.1);
+        animation: pulse 4s infinite;
+        background-size: cover;
+        background-position: center;
+        transition: background-image 0.5s ease-in-out;
+      }
+
+      .scene-description {
+        font-size: 1.2em;
+        line-height: 1.6;
+        margin-bottom: 20px;
+        padding: 15px;
+        background: rgba(0, 0, 0, 0.7);
+        border-left: 3px solid #ff0000;
+        position: relative;
+        overflow: hidden;
+        text-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+      }
+
+      .scene-description::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 0, 0, 0.1), transparent);
+        animation: shimmer 2s infinite;
+      }
+
+      .monster-text {
+        color: #ff0000;
+        text-shadow: 0 0 10px #ff0000;
+        font-weight: bold;
+        animation: glow 2s infinite;
+      }
+
+      .choice-button {
+        background: rgba(0, 0, 0, 0.8);
+        color: #fff;
+        border: 1px solid #ff0000;
+        padding: 15px 30px;
+        margin: 10px 0;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        width: 100%;
+        text-align: left;
+        font-family: 'Crimson Text', serif;
+        font-size: 1.1em;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .choice-button:hover {
+        background: rgba(255, 0, 0, 0.2);
+        transform: translateX(10px);
+        box-shadow: 0 0 20px rgba(255, 0, 0, 0.3);
+      }
+
+      .choice-button::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 0, 0, 0.2), transparent);
+        transition: 0.5s;
+      }
+
+      .choice-button:hover::before {
+        left: 100%;
+      }
+
+      .status {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: rgba(0, 0, 0, 0.8);
+        padding: 10px 20px;
+        border-radius: 5px;
+        border: 1px solid #ff0000;
+        color: #fff;
+        font-size: 0.9em;
+        z-index: 100;
+      }
+
+      @keyframes pulse {
+        0% { box-shadow: 0 0 20px rgba(255, 0, 0, 0.1); }
+        50% { box-shadow: 0 0 30px rgba(255, 0, 0, 0.2); }
+        100% { box-shadow: 0 0 20px rgba(255, 0, 0, 0.1); }
+      }
+
+      @keyframes glow {
+        0% { text-shadow: 0 0 10px #ff0000; }
+        50% { text-shadow: 0 0 20px #ff0000, 0 0 30px #ff0000; }
+        100% { text-shadow: 0 0 10px #ff0000; }
+      }
+
+      @keyframes shimmer {
+        0% { transform: translateX(-100%); }
+        100% { transform: translateX(100%); }
+      }
+
+      .fog-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><filter id="fog"><feTurbulence type="fractalNoise" baseFrequency="0.01" numOctaves="5" stitchTiles="stitch"/></filter><rect width="100" height="100" filter="url(%23fog)" fill="%23fff" opacity="0.05"/></svg>') repeat;
+        opacity: 0.1;
+        pointer-events: none;
+        z-index: 2;
+        animation: fog 20s linear infinite;
+      }
+
+      @keyframes fog {
+        0% { transform: translateY(0); }
+        100% { transform: translateY(-100%); }
+      }
+
+      .sound-controls {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        background: rgba(0, 0, 0, 0.8);
+        padding: 10px;
+        border-radius: 5px;
+        border: 1px solid #ff0000;
+        z-index: 100;
+      }
+
+      .sound-button {
+        background: none;
+        border: none;
+        color: #fff;
+        cursor: pointer;
+        font-size: 1.5em;
+        padding: 5px;
+        transition: all 0.3s ease;
+      }
+
+      .sound-button:hover {
+        color: #ff0000;
+        transform: scale(1.1);
+      }
+
+      .sound-button.muted {
+        color: #666;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="fog-overlay"></div>
+    <div class="story-container">
+      <div id="story-content"></div>
+    </div>
+    <div class="sound-controls">
+      <button class="sound-button" id="soundToggle">🔊</button>
+    </div>
+    <script>
+      // Audio system
+      const audio = new Audio('./EerieMusic.mp3');
+      audio.loop = true;
+      audio.volume = 0.3;
+
+      const soundToggle = document.getElementById('soundToggle');
+      let isMuted = true; // Start muted by default
+
+      soundToggle.addEventListener('click', () => {
+        if (isMuted) {
+          audio.play().catch(error => {
+            console.log('Audio playback error:', error);
+            soundToggle.textContent = '❌';
+          });
+          soundToggle.textContent = '🔊';
+        } else {
+          audio.pause();
+          soundToggle.textContent = '🔈';
+        }
+        isMuted = !isMuted;
+      });
+
+      // Start playing when user interacts with the page
+      document.addEventListener('click', () => {
+        if (!isMuted) {
+          audio.play().catch(error => {
+            console.log('Audio playback error:', error);
+            soundToggle.textContent = '❌';
+          });
+        }
+      }, { once: true });
+
+      // Story data with images
+      const storyData = {
+        start: {
+          text: `Te encuentras en la biblioteca del Museu Nacional d'Art de Catalunya. Es tarde y estás solo. 
+          <span class="monster-text">Las sombras parecen moverse entre las estanterías.</span>`,
+          choices: [
+            { text: 'Investigar los sonidos extraños', next: 'investigate' },
+            { text: 'Ignorar los sonidos y seguir adelante', next: 'ignore' }
+          ],
+          background: 'assets/img/proxy-image.jpg'
+        },
+        investigate: {
+          text: `Te acercas sigilosamente a la fuente del sonido. 
+          <span class="monster-text">Una estatua parece seguirte con sus ojos de piedra.</span>`,
+          choices: [
+            { text: 'Seguir investigando', next: 'sneak' },
+            { text: 'Encender las luces', next: 'lights' }
+          ],
+          background: 'assets/img/proxy-image2.jpg'
+        },
+        ignore: {
+          text: `Decides ignorar los sonidos y continuar. 
+          <span class="monster-text">Los pasos detrás de ti suenan como si tuvieran demasiados pies.</span>`,
+          choices: [
+            { text: 'Correr', next: 'run' },
+            { text: 'Girar y enfrentar lo que te sigue', next: 'confront' }
+          ],
+          background: 'assets/img/proxy-image3.jpg'
+        },
+        sneak: {
+          text: `Te mueves sigilosamente por la galería. 
+          <span class="monster-text">Las pinturas parecen cobrar vida en la oscuridad.</span>`,
+          choices: [
+            { text: 'Examinar una pintura extraña', next: 'examine' },
+            { text: 'Buscar una salida', next: 'search' }
+          ],
+          background: 'assets/img/proxy-image4.jpg'
+        },
+        lights: {
+          text: `Enciendes las luces y ves la famosa pintura de San Jorge. 
+          <span class="monster-text">El dragón parece moverse en el lienzo.</span>`,
+          choices: [
+            { text: 'Apagar las luces', next: 'switch' },
+            { text: 'Llamar a la policía', next: 'phone' }
+          ],
+          background: 'assets/img/proxy-image5.jpg'
+        },
+        switch: {
+          text: `Las luces se apagan y la oscuridad te envuelve. 
+          <span class="monster-text">Las estatuas parecen haberse movido.</span>`,
+          choices: [
+            { text: 'Encender las luces de nuevo', next: 'lights' },
+            { text: 'Buscar en la oscuridad', next: 'search' }
+          ],
+          background: 'assets/img/proxy-image6.jpg'
+        },
+        phone: {
+          text: `Llamas a la policía. 
+          <span class="monster-text">Las marcas de garras en el suelo brillan con un resplandor verdoso.</span>`,
+          choices: [
+            { text: 'Esperar a la policía', next: 'police' },
+            { text: 'Investigar más', next: 'investigate' }
+          ],
+          background: 'assets/img/proxy-image7.jpg'
+        },
+        confront: {
+          text: `Te giras para enfrentar lo que te sigue. 
+          <span class="monster-text">El restaurador tiene demasiados brazos y su rostro está distorsionado.</span>`,
+          choices: [
+            { text: 'Intentar escapar', next: 'run' },
+            { text: 'Enfrentar al restaurador', next: 'fight' }
+          ],
+          background: 'assets/img/proxy-image.jpg'
+        },
+        police: {
+          text: `La policía llega al museo. 
+          <span class="monster-text">Los oficiales tienen rostros de cera y se mueven de forma mecánica.</span>`,
+          choices: [
+            { text: 'Cooperar con la policía', next: 'cooperate' },
+            { text: 'Buscar evidencia', next: 'evidence' }
+          ],
+          background: 'assets/img/proxy-image2.jpg'
+        },
+        examine: {
+          text: `Te acercas a una pintura dañada. 
+          <span class="monster-text">La pintura parece respirar y las figuras se mueven.</span>`,
+          choices: [
+            { text: 'Tocar la pintura', next: 'touch' },
+            { text: 'Retroceder', next: 'sneak' }
+          ],
+          background: 'assets/img/proxy-image3.jpg'
+        },
+        search: {
+          text: `Buscas una salida en la oscuridad. 
+          <span class="monster-text">Las estatuas ríen en la oscuridad.</span>`,
+          choices: [
+            { text: 'Esconderte', next: 'hide' },
+            { text: 'Defenderte', next: 'defend' }
+          ],
+          background: 'assets/img/proxy-image4.jpg'
+        },
+        hide: {
+          text: `Te escondes detrás de una estatua. 
+          <span class="monster-text">La estatua gira su cabeza para mirarte.</span>`,
+          choices: [
+            { text: 'Quedarte quieto', next: 'still' },
+            { text: 'Correr', next: 'run' }
+          ],
+          background: 'assets/img/proxy-image5.jpg'
+        },
+        defend: {
+          text: `Te preparas para defenderte. 
+          <span class="monster-text">La cara de demonio de madera tiene ojos reales.</span>`,
+          choices: [
+            { text: 'Atacar', next: 'attack' },
+            { text: 'Buscar ayuda', next: 'help' }
+          ],
+          background: 'assets/img/proxy-image6.jpg'
+        },
+        follow: {
+          text: `Sigues al restaurador. 
+          <span class="monster-text">Las pinturas intentan escapar de sus marcos.</span>`,
+          choices: [
+            { text: 'Confrontar al restaurador', next: 'confront' },
+            { text: 'Buscar evidencia', next: 'evidence' }
+          ],
+          background: 'assets/img/proxy-image7.jpg'
+        },
+        help: {
+          text: `Buscas ayuda en el taller de restauración. 
+          <span class="monster-text">Hay demasiadas manos trabajando en las pinturas.</span>`,
+          choices: [
+            { text: 'Cooperar con el restaurador', next: 'cooperate' },
+            { text: 'Buscar la policía', next: 'police' }
+          ],
+          background: 'assets/img/proxy-image.jpg'
+        },
+        cooperate: {
+          text: `Decides cooperar con la policía. 
+          <span class="monster-text">Los documentos están escritos en sangre sobre piel humana.</span>`,
+          choices: [
+            { text: 'Firmar los documentos', next: 'sign' },
+            { text: 'Rechazar', next: 'reject' }
+          ],
+          background: 'assets/img/proxy-image2.jpg'
+        },
+        evidence: {
+          text: `Encuentras evidencia incriminatoria. 
+          <span class="monster-text">La evidencia brilla con un resplandor verdoso.</span>`,
+          choices: [
+            { text: 'Mostrar a la policía', next: 'police' },
+            { text: 'Confrontar al restaurador', next: 'confront' }
+          ],
+          background: 'assets/img/proxy-image3.jpg'
+        },
+        attack: {
+          text: `Decides atacar. 
+          <span class="monster-text">El restaurador se transforma en algo indescriptible.</span>`,
+          choices: [
+            { text: 'Continuar atacando', next: 'continue' },
+            { text: 'Huir', next: 'run' }
+          ],
+          background: 'assets/img/proxy-image4.jpg'
+        },
+        secret: {
+          text: `Descubres una sala secreta. 
+          <span class="monster-text">Las pinturas cobran vida y intentan escapar.</span>`,
+          choices: [
+            { text: 'Investigar más', next: 'investigate' },
+            { text: 'Salir', next: 'end' }
+          ],
+          background: 'assets/img/proxy-image5.jpg'
+        },
+        end: {
+          text: `Decides salir del museo. 
+          <span class="monster-text">Todas las estatuas giran sus cabezas para verte partir.</span>`,
+          choices: [
+            { text: 'Volver a empezar', next: 'start' }
+          ],
+          background: 'assets/img/proxy-image6.jpg'
+        },
+        run: {
+          text: `Intentas correr, pero las sombras te persiguen. 
+          <span class="monster-text">Los pasos detrás de ti multiplican sus ecos.</span>`,
+          choices: [
+            { text: 'Buscar un lugar para esconderte', next: 'hide' },
+            { text: 'Confrontar lo que te persigue', next: 'confront' }
+          ],
+          background: 'assets/img/proxy-image7.jpg'
+        },
+        still: {
+          text: `Te quedas completamente quieto. 
+          <span class="monster-text">La estatua sigue mirándote con ojos que no deberían moverse.</span>`,
+          choices: [
+            { text: 'Intentar escapar', next: 'run' },
+            { text: 'Mantenerte quieto', next: 'hide' }
+          ],
+          background: 'assets/img/proxy-image.jpg'
+        },
+        fight: {
+          text: `Te preparas para luchar contra el restaurador. 
+          <span class="monster-text">Sus brazos se multiplican y su rostro se descompone.</span>`,
+          choices: [
+            { text: 'Atacar', next: 'attack' },
+            { text: 'Intentar escapar', next: 'run' }
+          ],
+          background: 'assets/img/proxy-image2.jpg'
+        },
+        touch: {
+          text: `Tocas la pintura y sientes que te atrapa. 
+          <span class="monster-text">Las figuras intentan arrastrarte dentro del lienzo.</span>`,
+          choices: [
+            { text: 'Luchar para liberarte', next: 'fight' },
+            { text: 'Dejarte llevar', next: 'secret' }
+          ],
+          background: 'assets/img/proxy-image3.jpg'
+        },
+        sign: {
+          text: `Firmas los documentos con sangre. 
+          <span class="monster-text">Tu firma brilla con un resplandor verdoso.</span>`,
+          choices: [
+            { text: 'Volver a empezar', next: 'start' }
+          ],
+          background: 'assets/img/proxy-image4.jpg'
+        },
+        reject: {
+          text: `Rechazas firmar los documentos. 
+          <span class="monster-text">Los rostros de cera de los policías se derriten.</span>`,
+          choices: [
+            { text: 'Intentar escapar', next: 'run' },
+            { text: 'Volver a empezar', next: 'start' }
+          ],
+          background: 'assets/img/proxy-image5.jpg'
+        },
+        continue: {
+          text: `Continuas atacando. 
+          <span class="monster-text">El restaurador se descompone en algo que no debería existir.</span>`,
+          choices: [
+            { text: 'Volver a empezar', next: 'start' }
+          ],
+          background: 'assets/img/proxy-image6.jpg'
+        }
+      };
+
+      // Game state
+      let currentScene = 'start';
+      let inventory = [];
+      let health = 100;
+
+      // Game functions
+      function renderScene() {
+        const scene = storyData[currentScene];
+        if (!scene) {
+          console.error('Scene not found:', currentScene);
+          currentScene = 'start'; // Reset to start if scene not found
+          return renderScene();
+        }
+        
+        const root = document.getElementById('story-content');
+        const container = document.querySelector('.story-container');
+        
+        // Update background image
+        container.style.backgroundImage = `url('${scene.background}')`;
+        
+        root.innerHTML = `
+          <div class="scene-description">
+            ${scene.text}
+          </div>
+          <div class="choices">
+            ${scene.choices.map(choice => `
+              <button class="choice-button" onclick="updateScene('${choice.next}')">${choice.text}</button>
+            `).join('')}
+          </div>
+        `;
+      }
+
+      function updateScene(sceneId) {
+        if (!storyData[sceneId]) {
+          console.error('Invalid scene:', sceneId);
+          return;
+        }
+        
+        currentScene = sceneId;
+        renderScene();
+      }
+
+      // Initialize the game
+      renderScene();
+    </script>
+  </body>
+</html>
+ 
