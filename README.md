@@ -124,7 +124,7 @@ Este proyecto está bajo la Licencia MIT. Consulta el archivo `LICENSE` para má
 
 ## 👥 Créditos
 
-- **Desarrollo y Diseño**: [Tu Nombre]
+- **Desarrollo y Diseño**: Xesco.
 - **Imágenes**: Generadas con IA para uso exclusivo en este proyecto
 - **Música**: Composición original para Terror en el Museo
 - **Inspiración**: Museu Nacional d'Art de Catalunya
